@@ -1,4 +1,4 @@
-name: msml-env
+name: mlflow-env
 channels:
   - defaults
   - conda-forge
