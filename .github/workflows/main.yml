@@ -19,16 +19,16 @@ jobs:
       with:
         auto-activate-base: false
         environment-file: MLProject/conda.yaml
-        activate-environment: msml-env
+        activate-environment: mlflow-env  # pastikan nama ini sama dengan di conda.yaml
+        auto-update-conda: true
+        use-only-tar-bz2: true
 
     - name: Install MLflow
-      run: |
-        conda run -n msml-env pip install mlflow
-      
+      run: conda run -n mlflow-env pip install mlflow
+
     - name: Run MLflow project
-      run: |
-        conda run -n msml-env mlflow run MLProject -P n_neighbors=3
-      
+      run: conda run -n mlflow-env mlflow run MLProject -P n_neighbors=3
+
     - name: Upload Model Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -52,7 +52,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and Push Docker Image
+    - name: Build and push Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-car-model:latest .
-        docker push ${{ secrets.DOCKER_USERNAME }}/ml-car-model:latest
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-model:latest .
+        docker push ${{ secrets.DOCKER_USERNAME }}/ml-model:latest
