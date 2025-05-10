@@ -7,4 +7,4 @@ entry_points:
     parameters:
       n_neighbors: {type: int, default: 3}
     command: >
-      python train.py --n_neighbors {n_neighbors}
+      python modelling.py --n_neighbors {n_neighbors}
