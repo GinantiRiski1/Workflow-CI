@@ -17,7 +17,7 @@ jobs:
     - name: Set up Conda
       uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: '3.8'
+        python-version: '3.10'
         environment-file: MLProject/conda.yaml  # Menggunakan file conda.yaml
         activate-environment: 'mlflow-env'  # Nama environment yang sesuai dengan file conda.yaml
         auto-activate-base: false
@@ -36,6 +36,7 @@ jobs:
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
         MLFLOW_TRACKING_URI: "https://dagshub.com/GinantiRiski1/my-first-repo.mlflow"
+
       run: |
         conda init bash
         source ~/.bashrc
@@ -50,31 +51,3 @@ jobs:
         name: model-artifacts
         path: artifacts/
         retention-days: 30
-
-  docker:
-    needs: train
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Download Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: model-artifacts
-        path: MLProject/artifacts
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Login to DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./MLProject
-        push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlflow-env:latest
