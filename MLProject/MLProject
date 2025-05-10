@@ -4,4 +4,4 @@ entry_points:
   main:
     parameters:
       n_neighbors: {type: int, default: 3}
-    command: "python modeling.py --n_neighbors {n_neighbors}"
+    command: "python modelling.py --n_neighbors {n_neighbors}"
