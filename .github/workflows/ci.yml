@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repository
       uses: actions/checkout@v3
 
     - name: Set up Miniconda
@@ -19,25 +19,28 @@ jobs:
       with:
         environment-file: MLProject/conda.yaml
         activate-environment: mlflow-env
+        auto-activate-base: false
 
     - name: Install MLflow CLI
+      shell: bash -l {0}
       run: pip install mlflow
 
     - name: Run MLflow Project
+      shell: bash -l {0}
       run: |
         cd MLProject
         mlflow run .
 
-    - name: Archive trained model
+    - name: Save MLflow Artifacts
+      if: always()
       run: |
         mkdir -p artifacts
         cp -r MLProject/mlruns artifacts/mlruns
-      if: always()
 
-    - name: Upload artifact
+    - name: Upload MLflow artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: mlflow-artifact
+        name: mlflow-artifacts
         path: artifacts/mlruns
 
     - name: Log in to Docker Hub
@@ -46,7 +49,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and Push Docker image
+    - name: Build and Push Docker Image
       run: |
         docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest MLProject
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest
