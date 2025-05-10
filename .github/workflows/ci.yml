@@ -1,46 +1,34 @@
-name: Workflow CI
+name: MLflow CI Training
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build:
+  train-model:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-    - name: Set up Miniconda
+    - name: Set up Conda
       uses: conda-incubator/setup-miniconda@v2
       with:
-        miniconda-version: 'latest'
-        environment-file: MLProject/conda.yaml  # Menggunakan file conda.yaml di folder MLProject
-        auto-activate-base: false  # Tidak perlu aktifkan base environment secara otomatis
+        activate-environment: mlflow-env
+        environment-file: Workflow-CI/MLProject/conda.yaml
+        auto-activate-base: false
 
-    # Inisialisasi conda dan verifikasi
-    - name: Initialize conda
-      run: |
-        conda init bash  # Menginisialisasi conda agar bisa menggunakan 'conda activate'
-        source ~/.bashrc  # Memuat ulang konfigurasi bashrc setelah inisialisasi
-        conda --version  # Verifikasi instalasi conda
+    - name: Install MLflow CLI
+      run: pip install mlflow
 
-    # Install dependencies dan buat environment
-    - name: Create the conda environment
+    - name: Run MLflow Project
       run: |
-        conda env create -f MLProject/conda.yaml  # Membuat environment dari file conda.yaml
-        conda info --envs  # Memastikan bahwa environment msml-env sudah ada
-        conda list  # Menampilkan daftar paket di environment msml-env
-        which python  # Verifikasi Python environment yang digunakan
-        python --version  # Memastikan Python yang digunakan adalah dari environment msml-env
+        cd Workflow-CI/MLProject
+        mlflow run . --env-manager=local -P n_neighbors=3
 
-    # Jalankan MLflow dengan conda run dalam environment yang benar
-    - name: Run MLflow with conda run
-      run: |
-        cd MLProject  # Pastikan Anda berada di dalam folder yang benar
-        conda run -n msml-env mlflow run . -P n_neighbors=3  # Menjalankan MLflow dalam environment msml-env
+    - name: Upload model artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ml-model
+        path: Workflow-CI/MLProject/mlruns/
