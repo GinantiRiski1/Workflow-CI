@@ -27,7 +27,7 @@ def main(n_neighbors):
     y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
 
     # Set eksperimen
-    mlflow.set_experiment("basic-model_v2")
+    mlflow.set_experiment("model1")
 
     # Mulai pencatatan MLflow
     with mlflow.start_run():
