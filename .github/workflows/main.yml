@@ -19,7 +19,6 @@ jobs:
       with:
         auto-activate-base: false
         environment-file: MLProject/conda.yaml
-        activate-environment: mlflow-env  # pastikan nama ini sama dengan di conda.yaml
         auto-update-conda: true
         use-only-tar-bz2: true
 
