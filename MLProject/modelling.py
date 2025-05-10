@@ -14,26 +14,32 @@ def load_data():
     return X_train, X_test, y_train, y_test
 
 def train_model(n_neighbors):
+    # Set experiment dan aktifkan autolog
     mlflow.set_experiment("basic-model_v2")
     mlflow.sklearn.autolog()
 
+    # Load data
     X_train, X_test, y_train, y_test = load_data()
 
+    # Jalankan training dan logging
     with mlflow.start_run():
+        mlflow.log_param("n_neighbors", n_neighbors)
         model = KNeighborsClassifier(n_neighbors=n_neighbors)
         model.fit(X_train, y_train)
 
+        # Evaluasi
         preds = model.predict(X_test)
         acc = accuracy_score(y_test, preds)
         print(f"Accuracy: {acc}")
+        mlflow.log_metric("accuracy", acc)
 
-        # Simpan model ke file
+        # Simpan model secara manual juga
         joblib.dump(model, "trained_model.pkl")
         mlflow.log_artifact("trained_model.pkl")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--n_neighbors", type=int, default=3, help="Jumlah tetangga untuk KNN")
+    parser.add_argument("--n_neighbors", type=int, default=3)
     args = parser.parse_args()
 
     train_model(args.n_neighbors)
