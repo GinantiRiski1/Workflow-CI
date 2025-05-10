@@ -20,7 +20,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         conda-version: 'latest'
-        environment-file: conda.yaml
+        environment-file: MLProject/conda.yaml  # Menentukan path ke conda.yaml di dalam folder MLProject
         auto-activate-base: false
 
     - name: Debug Conda and Check Environment
