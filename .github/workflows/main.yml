@@ -35,13 +35,13 @@ jobs:
       env:
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
-        MLFLOW_TRACKING_URI: "https://dagshub.com/agummds/Stunting-Toddler.mlflow"
+        MLFLOW_TRACKING_URI: "https://dagshub.com/agummds/mlflow-env-Toddler.mlflow"
       run: |
         conda init bash
         source ~/.bashrc
         conda activate mlflow-env
         mlflow run MLProject \
-          --experiment-name "stunting-prediction" \
+          --experiment-name "mlflow-env" \
           --env-manager=conda
 
     - name: Upload Artifacts to GitHub
