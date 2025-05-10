@@ -1,53 +1,27 @@
-import argparse
 import pandas as pd
 import mlflow
 import mlflow.sklearn
-import joblib
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
-def load_data():
-    try:
-        X_train = pd.read_csv("car_preprocessing/X_train.csv")
-        X_test = pd.read_csv("car_preprocessing/X_test.csv")
-        y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
-        y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
-    except Exception as e:
-        print(f"Error loading data: {e}")
-        raise
-    return X_train, X_test, y_train, y_test
+# Autolog harus diaktifkan sebelum training
+mlflow.sklearn.autolog()
 
-def train_model(n_neighbors):
-    # Set experiment dan aktifkan autolog
-    mlflow.set_experiment("basic-model_v2")
-    mlflow.sklearn.autolog()
+# Load data
+X_train = pd.read_csv("car_preprocessing/X_train.csv")
+X_test = pd.read_csv("car_preprocessing/X_test.csv")
+y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
+y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
 
-    # Load data
-    X_train, X_test, y_train, y_test = load_data()
+# Set nama eksperimen
+mlflow.set_experiment("basic-model_v2")
 
-    # Jalankan training dan logging
-    with mlflow.start_run():
-        mlflow.log_param("n_neighbors", n_neighbors)
-        model = KNeighborsClassifier(n_neighbors=n_neighbors)
-        model.fit(X_train, y_train)
+    # Mulai MLflow run
+with mlflow.start_run():
+    model = KNeighborsClassifier(n_neighbors=3)
+    model.fit(X_train, y_train)
 
-        # Evaluasi
-        preds = model.predict(X_test)
-        acc = accuracy_score(y_test, preds)
-        print(f"Accuracy: {acc}")
-        mlflow.log_metric("accuracy", acc)
-
-        # Simpan model menggunakan joblib
-        model_filename = "trained_model.pkl"
-        joblib.dump(model, model_filename)
-        mlflow.log_artifact(model_filename)
-
-        # Simpan model dengan MLflow untuk track versi
-        mlflow.sklearn.log_model(model, "model")
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--n_neighbors", type=int, default=3)
-    args = parser.parse_args()
-
-    train_model(args.n_neighbors)
+    # Prediksi dan akurasi
+    preds = model.predict(X_test)
+    acc = accuracy_score(y_test, preds)
+    print(f"Accuracy: {acc}")
