@@ -7,10 +7,14 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
 def load_data():
-    X_train = pd.read_csv("car_preprocessing/X_train.csv")
-    X_test = pd.read_csv("car_preprocessing/X_test.csv")
-    y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
-    y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
+    try:
+        X_train = pd.read_csv("car_preprocessing/X_train.csv")
+        X_test = pd.read_csv("car_preprocessing/X_test.csv")
+        y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
+        y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
+    except Exception as e:
+        print(f"Error loading data: {e}")
+        raise
     return X_train, X_test, y_train, y_test
 
 def train_model(n_neighbors):
@@ -33,9 +37,13 @@ def train_model(n_neighbors):
         print(f"Accuracy: {acc}")
         mlflow.log_metric("accuracy", acc)
 
-        # Simpan model secara manual juga
-        joblib.dump(model, "trained_model.pkl")
-        mlflow.log_artifact("trained_model.pkl")
+        # Simpan model menggunakan joblib
+        model_filename = "trained_model.pkl"
+        joblib.dump(model, model_filename)
+        mlflow.log_artifact(model_filename)
+
+        # Simpan model dengan MLflow untuk track versi
+        mlflow.sklearn.log_model(model, "model")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
