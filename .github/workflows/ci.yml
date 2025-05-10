@@ -20,15 +20,17 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         conda-version: 'latest'
-        environment-file: MLProject/conda.yaml
+        environment-file: conda.yaml
         auto-activate-base: false
 
-    - name: Initialize conda
+    - name: Debug Conda and Check Environment
       run: |
-        conda init bash
-        source ~/.bashrc
-        conda activate msml-env
+        conda --version  # Menampilkan versi conda untuk memastikan instalasi conda berhasil
+        conda info  # Memeriksa konfigurasi conda secara keseluruhan
+        conda env list  # Memeriksa environment yang ada
+        conda activate msml-env  # Mengaktifkan environment msml-env
+        conda list  # Memeriksa paket yang terinstal dalam environment
 
-    - name: Run MLflow
+    - name: Run MLflow with conda run
       run: |
-        mlflow run . -P n_neighbors=3
+        conda run -n msml-env mlflow run . -P n_neighbors=3
