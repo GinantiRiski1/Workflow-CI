@@ -23,12 +23,11 @@ jobs:
         use-only-tar-bz2: true
 
     - name: Create Conda environment
-      run: conda env create -f MLProject/conda.yaml
+      run: |
+        conda env create -f MLProject/conda.yaml
+        conda list  # Mengecek apakah environment sudah terpasang dengan benar
 
-    - name: Install MLflow
-      run: conda run -n mlflow-env pip install mlflow
-
-    - name: Run MLflow project
+    - name: Run MLflow project using Conda run
       run: conda run -n mlflow-env mlflow run MLProject -P n_neighbors=3
 
     - name: Upload Model Artifact
