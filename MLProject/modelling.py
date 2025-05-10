@@ -1,46 +1,31 @@
-import os
 import pandas as pd
-import argparse
 import mlflow
 import mlflow.sklearn
+import argparse
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
-import dagshub  # Pastikan dagshub sudah diinstal
 
-# ❗ Tambahkan kredensial autentikasi ke DagsHub
-os.environ["MLFLOW_TRACKING_USERNAME"] ="GinantiRiski1"
-os.environ["MLFLOW_TRACKING_PASSWORD"] = "1c667fb27765f8765769adf9d56fcacfd4bab26c"  # Ganti dengan token asli dari DagsHub
+# Argumen
+parser = argparse.ArgumentParser()
+parser.add_argument('--n_neighbors', type=int, default=3)
+args = parser.parse_args()
 
-# Inisialisasi DagsHub
-dagshub.init(repo_owner='GinantiRiski1', repo_name='my-first-repo', mlflow=True)
+# Autolog MLflow
+mlflow.sklearn.autolog()
 
-# Konfigurasi MLflow untuk menggunakan DagsHub sebagai tracking server
-mlflow.set_tracking_uri("https://dagshub.com/GinantiRiski1/my-first-repo.mlflow")
+# Load data
+X_train = pd.read_csv("car_preprocessing/X_train.csv")
+X_test = pd.read_csv("car_preprocessing/X_test.csv")
+y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
+y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
 
-def main(n_neighbors):
-    mlflow.sklearn.autolog()
+# Set experiment
+mlflow.set_experiment("basic-model_v2")
 
-    # Load data
-    X_train = pd.read_csv("car_preprocessing/X_train.csv")
-    X_test = pd.read_csv("car_preprocessing/X_test.csv")
-    y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
-    y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
+with mlflow.start_run():
+    model = KNeighborsClassifier(n_neighbors=args.n_neighbors)
+    model.fit(X_train, y_train)
 
-    # Set eksperimen
-    mlflow.set_experiment("model11")
-
-    # Mulai pencatatan MLflow
-    with mlflow.start_run():
-        model = KNeighborsClassifier(n_neighbors=int(n_neighbors))
-        model.fit(X_train, y_train)
-
-        preds = model.predict(X_test)
-        acc = accuracy_score(y_test, preds)
-        print(f"Accuracy: {acc}")
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--n_neighbors", type=int, default=3, help="Number of neighbors for KNN")
-    args = parser.parse_args()
-
-    main(args.n_neighbors)
+    preds = model.predict(X_test)
+    acc = accuracy_score(y_test, preds)
+    print(f"Accuracy: {acc}")
