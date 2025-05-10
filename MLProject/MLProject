@@ -1,6 +1,9 @@
 name: mlflow-env
+
 conda_env: conda.yaml
+
 entry_points:
   main:
     parameters:
-      command: "python modelling.py" 
+      alpha: {type: float, default: 0.5}
+    command: "python modelling.py --alpha {alpha}"
