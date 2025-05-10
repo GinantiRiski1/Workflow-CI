@@ -1,7 +1,9 @@
-name: mlflow-env 
+name: mlflow-env
+
 conda_env: conda.yaml
+
 entry_points:
   main:
     parameters:
-      alpha: {type: float, default: 3}
-    command: "python modelling.py --alpha {alpha}"
+      n_neighbors: {type: int, default: 3, description: "Number of neighbors for KNN"}
+    command: "python modelling.py --n_neighbors {n_neighbors}"
