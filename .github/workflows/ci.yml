@@ -26,10 +26,17 @@ jobs:
 
     - name: Run MLflow project
       run: |
-        mlflow run MLProject -P n_neighbors=3
+        conda run -n msml-env mlflow run MLProject -P n_neighbors=3
+
+    - name: Check if trained model exists
+      run: |
+        if [ ! -f MLProject/trained_model.pkl ]; then
+          echo "Model file not found!"
+          exit 1
+        fi
 
     - name: Upload trained model artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: trained-model
         path: MLProject/trained_model.pkl
