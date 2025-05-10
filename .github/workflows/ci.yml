@@ -25,7 +25,6 @@ jobs:
 
       # Verifikasi environment Conda aktif
       - name: Verify Conda Environment
-        shell: bash -l {0}
         run: |
           conda info --envs
           conda activate mlflow-env
@@ -33,28 +32,24 @@ jobs:
 
       # Install dependencies tambahan jika diperlukan
       - name: Install Dependencies
-        shell: bash -l {0}
         run: |
           conda activate mlflow-env
           pip install -r MLProject/requirements.txt || echo "requirements.txt not found, skipping..."
 
       # Install MLflow CLI
       - name: Install MLflow CLI
-        shell: bash -l {0}
         run: |
           conda activate mlflow-env
           pip install mlflow==2.22.0
 
       # Check MLflow version
       - name: Check MLflow version
-        shell: bash -l {0}
         run: |
           conda activate mlflow-env
           mlflow --version
 
       # Jalankan MLflow Project
       - name: Run MLflow Project
-        shell: bash -l {0}
         run: |
           cd MLProject
           mlflow run .
@@ -73,7 +68,7 @@ jobs:
 
       # Upload artifacts ke GitHub
       - name: Upload MLflow artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: mlflow-artifacts
           path: artifacts/mlruns
