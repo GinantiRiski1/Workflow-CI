@@ -9,7 +9,7 @@ import dagshub  # Pastikan dagshub sudah diinstal
 
 # ❗ Tambahkan kredensial autentikasi ke DagsHub
 os.environ["MLFLOW_TRACKING_USERNAME"] ="GinantiRiski1"
-os.environ["MLFLOW_TRACKING_PASSWORD"] = "e70969a18d3b6dbba01a465fbcda865438a17074"  # Ganti dengan token asli dari DagsHub
+os.environ["MLFLOW_TRACKING_PASSWORD"] = "1c667fb27765f8765769adf9d56fcacfd4bab26c"  # Ganti dengan token asli dari DagsHub
 
 # Inisialisasi DagsHub
 dagshub.init(repo_owner='GinantiRiski1', repo_name='my-first-repo', mlflow=True)
@@ -27,7 +27,7 @@ def main(n_neighbors):
     y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
 
     # Set eksperimen
-    mlflow.set_experiment("model1")
+    mlflow.set_experiment("model11")
 
     # Mulai pencatatan MLflow
     with mlflow.start_run():
