@@ -1,59 +1,80 @@
-name: Train ML Model CI
+name: MLflow CI
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  train-model:
+  train:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
-
+    - uses: actions/checkout@v2
+    
     - name: Set up Conda
       uses: conda-incubator/setup-miniconda@v2
       with:
+        python-version: '3.8'
+        environment-file: MLProject/environment.yml  # Menggunakan file environment.yml
+        activate-environment: 'mlflow-env'  # Nama environment yang sesuai dengan file environment.yml
         auto-activate-base: false
-        environment-file: MLProject/conda.yaml
-        auto-update-conda: true
-        use-only-tar-bz2: true
-
-    - name: Create Conda environment
+    
+    - name: Install MLflow
+      shell: bash -l {0}
       run: |
-        conda env create -f MLProject/conda.yaml
-        conda list  # Mengecek apakah environment sudah terpasang dengan benar
+        conda init bash
+        source ~/.bashrc
+        conda activate mlflow-env
+        pip install mlflow requests tenacity
+    
+    - name: Run MLflow Project
+      shell: bash -l {0}
+      env:
+        MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+        MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+        MLFLOW_TRACKING_URI: "https://dagshub.com/agummds/Stunting-Toddler.mlflow"
+      run: |
+        conda init bash
+        source ~/.bashrc
+        conda activate mlflow-env
+        mlflow run MLProject \
+          --experiment-name "stunting-prediction" \
+          --env-manager=conda
 
-    - name: Run MLflow project using Conda run
-      run: conda run -n mlflow-env mlflow run MLProject -P n_neighbors=3
-
-    - name: Upload Model Artifact
+    - name: Upload Artifacts to GitHub
       uses: actions/upload-artifact@v4
       with:
-        name: trained-model
-        path: MLProject/trained_model.pkl
+        name: model-artifacts
+        path: artifacts/
+        retention-days: 30
 
-  dockerize:
-    needs: train-model
+  docker:
+    needs: train
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v2
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: model-artifacts
+        path: MLProject/artifacts
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Log in to Docker Hub
+    - name: Login to DockerHub
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push Docker image
-      run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-model:latest .
-        docker push ${{ secrets.DOCKER_USERNAME }}/ml-model:latest
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./MLProject
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/stunting-prediction:latest
