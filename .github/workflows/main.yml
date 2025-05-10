@@ -47,7 +47,7 @@ jobs:
         python -c "
         import mlflow
         import os
-        mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo.mlflow')
+        mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo')
         print('MLflow tracking URI:', mlflow.get_tracking_uri())
         print('Testing connection...')
         try:
@@ -63,7 +63,7 @@ jobs:
       env:
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
-        MLFLOW_TRACKING_URI: "https://dagshub.com/GinantiRiski1/my-first-repo.mlflow"
+        MLFLOW_TRACKING_URI: "https://dagshub.com/GinantiRiski1/my-first-repo"
       run: |
         conda init bash
         source ~/.bashrc
@@ -90,7 +90,7 @@ jobs:
         @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=60))
         def download_artifacts_with_retry():
             try:
-                mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo.mlflow')
+                mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo')
                 experiment = mlflow.get_experiment_by_name('mlflow-env)
                 if experiment is None:
                     print('Experiment not found')
