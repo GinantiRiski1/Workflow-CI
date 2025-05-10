@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
@@ -40,7 +40,7 @@ jobs:
           cp -r MLProject/mlruns artifacts/mlruns || echo "No mlruns directory found"
 
       - name: Upload MLflow artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@8b0f3aa761b50e62dcf7045b94dfbdeff86c6f4e
         with:
           name: mlflow-artifacts
           path: artifacts/mlruns
