@@ -36,7 +36,7 @@ jobs:
         fi
 
     - name: Upload trained model artifact
-      uses: actions/upload-artifact@v3  # Updated to v3
+      uses: actions/upload-artifact@v2  # Version reverted to v2
       with:
         name: trained-model
         path: MLProject/trained_model.pkl
