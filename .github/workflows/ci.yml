@@ -25,7 +25,8 @@ jobs:
       run: pip install mlflow
 
     - name: Run MLflow project
-      run: mlflow run MLProject -P n_neighbors=3
+      run: |
+        mlflow run MLProject -P n_neighbors=3
 
     - name: Upload trained model artifact
       uses: actions/upload-artifact@v3
