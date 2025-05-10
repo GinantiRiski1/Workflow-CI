@@ -27,7 +27,7 @@ jobs:
       
     - name: Run MLflow project
       run: |
-        conda run -n msml-env mlflow run MLProject/ -P n_neighbors=3 --no-conda
+        conda run -n msml-env mlflow run MLProject -P n_neighbors=3
       
     - name: Upload Model Artifact
       uses: actions/upload-artifact@v4
