@@ -9,7 +9,7 @@ import dagshub  # Pastikan dagshub sudah diinstal
 
 # ❗ Tambahkan kredensial autentikasi ke DagsHub
 os.environ["MLFLOW_TRACKING_USERNAME"] ="GinantiRiski1"
-os.environ["MLFLOW_TRACKING_PASSWORD"] = "553123319c3d13c50753c23af6d0f7453f8b1bdb"  # Ganti dengan token asli dari DagsHub
+os.environ["MLFLOW_TRACKING_PASSWORD"] = "e70969a18d3b6dbba01a465fbcda865438a17074"  # Ganti dengan token asli dari DagsHub
 
 # Inisialisasi DagsHub
 dagshub.init(repo_owner='GinantiRiski1', repo_name='my-first-repo', mlflow=True)
