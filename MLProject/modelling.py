@@ -2,6 +2,7 @@ import argparse
 import pandas as pd
 import mlflow
 import mlflow.sklearn
+import joblib
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
@@ -13,13 +14,9 @@ def load_data():
     return X_train, X_test, y_train, y_test
 
 def train_model(n_neighbors):
-    # Aktifkan autolog sebelum training
+    mlflow.set_experiment("basic-model_v2")
     mlflow.sklearn.autolog()
 
-    # Set eksperimen
-    mlflow.set_experiment("basic-model_v2")
-
-    # Load data
     X_train, X_test, y_train, y_test = load_data()
 
     with mlflow.start_run():
@@ -29,6 +26,10 @@ def train_model(n_neighbors):
         preds = model.predict(X_test)
         acc = accuracy_score(y_test, preds)
         print(f"Accuracy: {acc}")
+
+        # Simpan model ke file
+        joblib.dump(model, "trained_model.pkl")
+        mlflow.log_artifact("trained_model.pkl")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
