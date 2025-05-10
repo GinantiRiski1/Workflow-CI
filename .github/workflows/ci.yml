@@ -20,7 +20,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         conda-version: 'latest'
-        environment-file: conda.yaml
+        environment-file: MLProject/conda.yaml
         auto-activate-base: false
 
     - name: Initialize conda
