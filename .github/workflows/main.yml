@@ -43,7 +43,7 @@ jobs:
       run: |
         conda init bash
         source ~/.bashrc
-        conda activate stunting-prediction
+        conda activate mlflow-env
         python -c "
         import mlflow
         import os
