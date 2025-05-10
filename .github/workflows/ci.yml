@@ -1,0 +1,60 @@
+name: Train ML Model CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  train-model:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Conda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-activate-base: false
+        environment-file: MLProject/conda.yaml
+        activate-environment: msml-env
+
+    - name: Install MLflow
+      run: |
+        conda activate msml-env
+        pip install mlflow
+
+    - name: Run MLflow project
+      run: |
+        conda activate msml-env
+        mlflow run MLProject/ -P n_neighbors=3
+
+    - name: Upload Model Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: trained-model
+        path: MLProject/trained_model.pkl
+
+  dockerize:
+    needs: train-model
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-car-model:latest .
+        docker push ${{ secrets.DOCKER_USERNAME }}/ml-car-model:latest
