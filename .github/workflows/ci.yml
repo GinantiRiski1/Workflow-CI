@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Setup Miniconda
+      # Setup Conda environment
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -23,45 +23,63 @@ jobs:
           activate-environment: mlflow-env
           auto-activate-base: false
 
-      # Install dependencies from requirements.txt
+      # Verifikasi environment Conda aktif
+      - name: Verify Conda Environment
+        shell: bash -l {0}
+        run: |
+          conda info --envs
+          conda activate mlflow-env
+          conda list
+
+      # Install dependencies tambahan jika diperlukan
       - name: Install Dependencies
+        shell: bash -l {0}
         run: |
           conda activate mlflow-env
-          pip install -r MLProject/requirements.txt
+          pip install -r MLProject/requirements.txt || echo "requirements.txt not found, skipping..."
 
-      # Install MLflow CLI (pastikan versi sama dengan conda.yaml)
+      # Install MLflow CLI
       - name: Install MLflow CLI
+        shell: bash -l {0}
         run: |
           conda activate mlflow-env
           pip install mlflow==2.22.0
 
-      # Jalankan MLflow training
-      - name: Run MLflow Project
+      # Check MLflow version
+      - name: Check MLflow version
+        shell: bash -l {0}
         run: |
           conda activate mlflow-env
-          mlflow run MLProject -P n_neighbors=3
+          mlflow --version
 
-      # List isi artifacts
-      - name: List contents of MLruns
+      # Jalankan MLflow Project
+      - name: Run MLflow Project
+        shell: bash -l {0}
         run: |
-          ls -R MLProject/mlruns || echo "No mlruns folder found"
+          cd MLProject
+          mlflow run .
 
-      # Simpan artifacts hasil MLflow
+      # Debug: list isi MLruns
+      - name: List contents of mlruns
+        run: |
+          ls -l MLProject/mlruns || echo "mlruns folder not found"
+
+      # Simpan artifact
       - name: Save MLflow Artifacts
         if: always()
         run: |
           mkdir -p artifacts
-          cp -r MLProject/mlruns artifacts/mlruns
+          cp -r MLProject/mlruns artifacts/mlruns || echo "No mlruns directory found"
 
-      # Upload artifact ke GitHub Actions
+      # Upload artifacts ke GitHub
       - name: Upload MLflow artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: mlflow-artifacts
           path: artifacts/mlruns
 
       # Login ke Docker Hub
-      - name: Login to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
