@@ -23,11 +23,12 @@ jobs:
         environment-file: MLProject/conda.yaml  # Menggunakan file conda.yaml di folder MLProject
         auto-activate-base: false  # Tidak perlu aktifkan base environment secara otomatis
 
-    # Inisialisasi conda
+    # Inisialisasi conda dan aktifkan environment
     - name: Initialize conda
       run: |
         conda init bash  # Menginisialisasi conda agar bisa menggunakan 'conda activate'
         source ~/.bashrc  # Memuat ulang konfigurasi bashrc setelah inisialisasi
+        conda --version  # Verifikasi instalasi conda
 
     # Install dependencies dan buat environment
     - name: Create and activate the conda environment
@@ -37,7 +38,8 @@ jobs:
         conda activate msml-env  # Mengaktifkan environment yang telah dibuat
         conda info --envs  # Memastikan bahwa environment msml-env sudah ada
         conda list  # Menampilkan daftar paket di environment msml-env
-
+        which python  # Verifikasi Python environment yang digunakan
+        python --version  # Memastikan Python yang digunakan adalah dari environment msml-env
 
     # Jalankan MLflow dengan conda run dalam environment yang benar
     - name: Run MLflow with conda run
