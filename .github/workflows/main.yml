@@ -22,6 +22,9 @@ jobs:
         auto-update-conda: true
         use-only-tar-bz2: true
 
+    - name: Create Conda environment
+      run: conda env create -f MLProject/conda.yaml
+
     - name: Install MLflow
       run: conda run -n mlflow-env pip install mlflow
 
