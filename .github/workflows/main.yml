@@ -91,7 +91,7 @@ jobs:
         def download_artifacts_with_retry():
             try:
                 mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo.mlflow')
-                experiment = mlflow.get_experiment_by_name('mlflow-env)
+                experiment = mlflow.get_experiment_by_name('mlflow-env')
                 if experiment is None:
                     print('Experiment not found')
                     return
