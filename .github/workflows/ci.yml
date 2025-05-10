@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code dari repository
+      # Checkout repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Miniconda untuk environment Conda
+      # Setup Conda environment
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -23,53 +23,64 @@ jobs:
           activate-environment: mlflow-env
           auto-activate-base: false
 
-      # Install dependencies (pastikan dependensi sudah benar di conda.yaml atau requirements.txt)
-      - name: Install Dependencies
-        run: |
-          conda activate mlflow-env
-          pip install -r MLProject/requirements.txt
-
-      # Install MLflow CLI jika perlu
-      - name: Install MLflow CLI
-        run: |
-          conda activate mlflow-env
-          pip install mlflow==2.22.0
-
-      # Cek apakah environment berhasil diaktifkan
-      - name: Check Conda Environment
+      # Verifikasi environment Conda aktif
+      - name: Verify Conda Environment
         run: |
           conda info --envs
           conda activate mlflow-env
           conda list
 
-      # Jalankan eksperimen MLflow
+      # Install dependencies from requirements.txt if needed
+      - name: Install Dependencies
+        run: |
+          conda activate mlflow-env
+          pip install -r MLProject/requirements.txt
+
+      # Install MLflow CLI if necessary
+      - name: Install MLflow CLI
+        run: |
+          conda activate mlflow-env
+          pip install mlflow==2.22.0
+
+      # Verify if MLflow is installed correctly
+      - name: Check MLflow version
+        run: |
+          conda activate mlflow-env
+          mlflow --version
+
+      # Run MLflow experiment and ensure artifacts are created
       - name: Run MLflow Project
         run: |
           cd MLProject
           mlflow run .
 
-      # Simpan hasil artifacts
+      # Debug: list contents of the MLruns directory (ensure it's created)
+      - name: List contents of mlruns
+        run: |
+          ls -l MLProject/mlruns
+
+      # Save and upload MLflow artifacts
       - name: Save MLflow Artifacts
         if: always()
         run: |
           mkdir -p artifacts
           cp -r MLProject/mlruns artifacts/mlruns
 
-      # Upload hasil artifacts ke GitHub
+      # Upload MLflow artifacts to GitHub Actions storage
       - name: Upload MLflow artifacts
         uses: actions/upload-artifact@v3
         with:
           name: mlflow-artifacts
           path: artifacts/mlruns
 
-      # Login ke Docker Hub
+      # Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build dan Push Docker Image
+      # Build and push Docker image
       - name: Build and Push Docker Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest MLProject
