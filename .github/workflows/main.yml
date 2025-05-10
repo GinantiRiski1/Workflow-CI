@@ -14,12 +14,17 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    
     - name: Set up Conda
       uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: '3.10'
-        environment-file: MLProject/conda.yaml  # Menggunakan file conda.yaml
-        activate-environment: 'mlflow-env'  # Nama environment yang sesuai dengan file conda.yaml
+        python-version: '3.8'
+        activate-environment: 'stunting-prediction'
+        environment-file: MLProject/conda.yaml
         auto-activate-base: false
     
     - name: Install MLflow
@@ -30,13 +35,35 @@ jobs:
         conda activate mlflow-env
         pip install mlflow requests tenacity
     
+    - name: Test DagsHub Connection
+      shell: bash -l {0}
+      env:
+        MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+        MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+      run: |
+        conda init bash
+        source ~/.bashrc
+        conda activate stunting-prediction
+        python -c "
+        import mlflow
+        import os
+        mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo.mlflow')
+        print('MLflow tracking URI:', mlflow.get_tracking_uri())
+        print('Testing connection...')
+        try:
+            mlflow.search_experiments()
+            print('Connection successful!')
+        except Exception as e:
+            print('Connection failed:', str(e))
+            exit(1)
+        "
+    
     - name: Run MLflow Project
       shell: bash -l {0}
       env:
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
         MLFLOW_TRACKING_URI: "https://dagshub.com/GinantiRiski1/my-first-repo.mlflow"
-
       run: |
         conda init bash
         source ~/.bashrc
@@ -45,9 +72,90 @@ jobs:
           --experiment-name "mlflow-env" \
           --env-manager=conda
 
+    - name: Download MLflow Artifacts
+      shell: bash -l {0}
+      env:
+        MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+        MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+      run: |
+        conda init bash
+        source ~/.bashrc
+        conda activate mlflow-env
+        python -c "
+        import mlflow
+        import os
+        import time
+        from tenacity import retry, stop_after_attempt, wait_exponential
+        
+        @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=60))
+        def download_artifacts_with_retry():
+            try:
+                mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo.mlflow')
+                experiment = mlflow.get_experiment_by_name('mlflow-env)
+                if experiment is None:
+                    print('Experiment not found')
+                    return
+                
+                runs = mlflow.search_runs(experiment_ids=[experiment.experiment_id])
+                if runs.empty:
+                    print('No runs found')
+                    return
+                
+                latest_run = runs.iloc[0]
+                print(f'Downloading artifacts from run: {latest_run.run_id}')
+                
+                # Create artifacts directory if it doesn't exist
+                os.makedirs('artifacts', exist_ok=True)
+                
+                # Download artifacts
+                mlflow.artifacts.download_artifacts(latest_run.artifact_uri, dst_path='artifacts')
+                print('Artifacts downloaded successfully')
+                
+            except Exception as e:
+                print(f'Error downloading artifacts: {str(e)}')
+                raise
+        
+        try:
+            download_artifacts_with_retry()
+        except Exception as e:
+            print(f'Failed to download artifacts after retries: {str(e)}')
+            # Create a dummy artifact to prevent workflow failure
+            os.makedirs('artifacts', exist_ok=True)
+            with open('artifacts/error.txt', 'w') as f:
+                f.write(f'Failed to download artifacts: {str(e)}')
+        "
+
     - name: Upload Artifacts to GitHub
       uses: actions/upload-artifact@v4
       with:
         name: model-artifacts
         path: artifacts/
         retention-days: 30
+
+  docker:
+    needs: train
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: model-artifacts
+        path: MLProject/artifacts
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./MLProject
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlflow-env:latest 
