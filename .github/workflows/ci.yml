@@ -1,9 +1,9 @@
-name: Train and Deploy Model
+name: MLflow CI & Docker Build
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - 'MLProject/**'
   workflow_dispatch:
 
 jobs:
@@ -11,39 +11,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Set up Conda
+    - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v2
       with:
-        auto-update-conda: true
-        activate-environment: msml-env
         environment-file: MLProject/conda.yaml
+        activate-environment: mlflow-env
 
-    - name: Install MLflow
+    - name: Install MLflow CLI
       run: pip install mlflow
 
-    - name: Run MLflow project
+    - name: Run MLflow Project
       run: |
-        mlflow run MLProject -P n_neighbors=3
+        cd MLProject
+        mlflow run .
 
-    - name: Upload trained model artifact
-      uses: actions/upload-artifact@v2  # Ganti ke v2
+    - name: Archive trained model
+      run: |
+        mkdir -p artifacts
+        cp -r MLProject/mlruns artifacts/mlruns
+      if: always()
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
       with:
-        name: trained-model
-        path: MLProject/trained_model.pkl
+        name: mlflow-artifact
+        path: artifacts/mlruns
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build Docker image
+    - name: Build and Push Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-model:latest ./MLProject
-
-    - name: Push Docker image
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/ml-model:latest
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest MLProject
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest
