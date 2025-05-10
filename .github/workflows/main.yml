@@ -18,8 +18,8 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: '3.8'
-        environment-file: MLProject/conda.yml  # Menggunakan file environment.yml
-        activate-environment: 'mlflow-env'  # Nama environment yang sesuai dengan file environment.yml
+        environment-file: MLProject/conda.yaml  # Menggunakan file conda.yaml
+        activate-environment: 'mlflow-env'  # Nama environment yang sesuai dengan file conda.yaml
         auto-activate-base: false
     
     - name: Install MLflow
