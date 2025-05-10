@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -35,7 +34,12 @@ jobs:
           cd MLProject
           mlflow run .
 
-      # Save MLflow Artifacts locally
+      # Check if mlruns folder exists, create if not
+      - name: Create mlruns folder if it doesn't exist
+        run: |
+          mkdir -p MLProject/mlruns
+
+      # Save MLflow Artifacts
       - name: Save MLflow Artifacts
         if: always()
         run: |
