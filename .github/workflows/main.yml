@@ -23,7 +23,7 @@ jobs:
 
     - name: Install MLflow
       run: |
-        conda run -n msml-env pip install mlflow --no-conda
+        conda run -n msml-env pip install mlflow
       
     - name: Run MLflow project
       run: |
