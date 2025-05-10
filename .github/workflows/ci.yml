@@ -38,9 +38,8 @@ jobs:
         conda info --envs  # Memastikan bahwa environment msml-env sudah ada
         conda list  # Menampilkan daftar paket di environment msml-env
 
-    # Pastikan berada di dalam folder MLProject dan jalankan perintah MLflow
+    # Jalankan MLflow dengan conda run dalam environment yang benar
     - name: Run MLflow with conda run
       run: |
         cd MLProject  # Pastikan Anda berada di dalam folder yang benar
-        ls  # Menampilkan isi folder untuk memastikan bahwa file MLproject dan skrip ada di dalamnya
         conda run -n msml-env mlflow run . -P n_neighbors=3  # Menjalankan MLflow dalam environment msml-env
