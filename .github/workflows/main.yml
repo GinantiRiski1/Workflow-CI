@@ -23,13 +23,13 @@ jobs:
 
     - name: Install MLflow
       run: |
-        conda activate msml-env
-        pip install mlflow
+        conda activate msml-env pip install mlflow
+      shell: bash -l {0}
 
     - name: Run MLflow project
       run: |
-        conda activate msml-env
-        mlflow run MLProject/ -P n_neighbors=3
+        conda activate msml-env mlflow run MLProject/ -P n_neighbors=3
+      shell: bash -l {0}
 
     - name: Upload Model Artifact
       uses: actions/upload-artifact@v4
