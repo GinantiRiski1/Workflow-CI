@@ -26,20 +26,13 @@ jobs:
 
     - name: Run MLflow project
       run: |
-        conda run -n msml-env mlflow run MLProject -P n_neighbors=3
-
-    - name: Check if trained model exists
-      run: |
-        if [ ! -f MLProject/trained_model.pkl ]; then
-          echo "Model file not found!"
-          exit 1
-        fi
+        mlflow run MLProject -P n_neighbors=3
 
     - name: Upload trained model artifact
-      uses: actions/upload-artifact@v2  # Version reverted to v2
+      uses: actions/upload-artifact@v3
       with:
         name: trained-model
-        path: MLProject/trained_model.pkl
+        path: MLProject/model/model.pkl
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
