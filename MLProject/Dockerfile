@@ -1,21 +1,42 @@
-# Gunakan base image miniconda yang sudah terinstall Conda
-FROM continuumio/miniconda3
+# Gunakan image dasar Python
+FROM python:3.8-slim
 
-# Salin seluruh folder MLProject ke dalam container di direktori /MLProject
-COPY MLProject/ /MLProject
+# Set working directory
+WORKDIR /app
 
-# Set folder kerja (working directory) di dalam container ke /MLProject
-WORKDIR /MLProject
+# Install dependencies
+COPY MLProject/conda.yaml /app/conda.yaml
+RUN apt-get update && apt-get install -y \
+    libglib2.0-0 libsm6 libxext6 libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Perbarui conda ke versi terbaru dan install dependencies berdasarkan conda.yaml
-RUN conda update -n base -c defaults conda -y
-RUN conda env create -f conda.yaml
+# Install Miniconda
+RUN curl -sSL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o miniconda.sh \
+    && bash miniconda.sh -b -p /opt/conda \
+    && rm miniconda.sh \
+    && /opt/conda/bin/conda init bash
 
-# Aktifkan environment msml-env
+# Update Conda
+RUN /opt/conda/bin/conda update -n base -c defaults conda
+
+# Set environment variable
+ENV PATH=/opt/conda/bin:$PATH
+
+# Install Conda environment and dependencies from conda.yaml
+RUN /opt/conda/bin/conda env create -f /app/conda.yaml
+
+# Activate environment
 RUN echo "source activate msml-env" > ~/.bashrc
+ENV PATH /opt/conda/envs/msml-env/bin:$PATH
 
-# Install mlflow di environment msml-env
-RUN conda activate msml-env && pip install mlflow
+# Install MLflow
+RUN pip install mlflow
 
-# Set perintah untuk menjalankan MLflow secara otomatis
-ENTRYPOINT ["conda", "run", "-n", "msml-env", "mlflow", "run", ".", "-P", "n_neighbors=3"]
+# Salin project ke dalam container
+COPY MLProject /app/MLProject
+
+# Install any other dependencies, if needed
+# RUN pip install -r requirements.txt
+
+# Command to run the model after container startup
+ENTRYPOINT ["mlflow", "run", "MLProject", "-P", "n_neighbors=3"]
