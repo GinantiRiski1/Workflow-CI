@@ -1,10 +1,9 @@
-name: CI - MLflow Training
+name: Train and Deploy Model
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -12,33 +11,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Set up Miniconda
+    - name: Set up Conda
       uses: conda-incubator/setup-miniconda@v2
       with:
         auto-update-conda: true
         activate-environment: msml-env
-        environment-file: Workflow-CI/MLProject/conda.yaml
-        python-version: 3.10
+        environment-file: MLProject/conda.yaml
 
     - name: Install MLflow
-      shell: bash -l {0}
-      run: |
-        pip install mlflow
+      run: pip install mlflow
 
-    - name: Run MLflow Project (model training)
-      shell: bash -l {0}
-      run: |
-        cd Workflow-CI/MLProject
-        mlflow run . -P n_neighbors=5
+    - name: Run MLflow project
+      run: mlflow run MLProject -P n_neighbors=3
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - name: Upload trained model artifact
+      uses: actions/upload-artifact@v3
       with:
         name: trained-model
-        path: Workflow-CI/MLProject/trained_model.pkl
+        path: MLProject/trained_model.pkl
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -46,10 +39,10 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build Docker Image
+    - name: Build Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/msml-image:latest .
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-model:latest ./MLProject
 
-    - name: Push Docker Image
+    - name: Push Docker image
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/msml-image:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/ml-model:latest
