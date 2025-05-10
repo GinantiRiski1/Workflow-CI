@@ -1,42 +1,60 @@
-name: MLflow CI
+name: Train ML Model CI
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  train:
+  train-model:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Set up Conda
+      uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: '3.10'
+        auto-activate-base: false
+        environment-file: MLProject/conda.yaml
+        activate-environment: msml-env
 
-    - name: Install MLflow and Conda
+    - name: Install MLflow
       run: |
+        conda activate msml-env
         pip install mlflow
-        sudo apt-get install -y libgl1-mesa-glx
 
-    - name: Run MLflow Project
+    - name: Run MLflow project
       run: |
-        mlflow run MLProject -P n_neighbors=3
+        conda activate msml-env
+        mlflow run MLProject/ -P n_neighbors=3
 
-    - name: Archive Artifacts
-      uses: actions/upload-artifact@v3
+    - name: Upload Model Artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: model-artifacts
-        path: mlruns/
+        name: trained-model
+        path: MLProject/trained_model.pkl
 
-    - name: Docker Login
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+  dockerize:
+    needs: train-model
+    runs-on: ubuntu-latest
 
-    - name: Build and Push Docker image
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Docker Image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/msml-model:latest .
-        docker push ${{ secrets.DOCKER_USERNAME }}/msml-model:latest
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-car-model:latest .
+        docker push ${{ secrets.DOCKER_USERNAME }}/ml-car-model:latest
