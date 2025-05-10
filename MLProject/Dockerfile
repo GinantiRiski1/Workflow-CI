@@ -1,37 +1,28 @@
-# Gunakan image base untuk Python
-FROM python:3.10-slim
+# Menggunakan image dasar Miniconda
+FROM continuumio/miniconda3:latest
 
-# Set working directory dalam container
+# Menyeting direktori kerja dalam container
 WORKDIR /app
 
-# Salin conda.yaml dan requirements ke dalam container
-COPY MLProject/conda.yaml /app/conda.yaml
+# Menyalin file yang diperlukan (termasuk MLProject dan conda.yaml)
+COPY . /app
 
-# Install Miniconda (optional, bisa diganti jika sudah menggunakan conda)
-RUN apt-get update && apt-get install -y \
-    wget \
-    && wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
-    && rm Miniconda3-latest-Linux-x86_64.sh \
-    && /opt/conda/bin/conda init bash
+# Install dependencies dari conda.yaml
+RUN conda env create -f MLProject/conda.yaml && \
+    conda clean --all -f -y
 
-# Set environment variable untuk menggunakan conda
-ENV PATH=/opt/conda/bin:$PATH
+# Set environment variable untuk conda environment
+ENV PATH /opt/conda/envs/mlflow-env/bin:$PATH
 
-# Install dependencies menggunakan conda
-RUN conda env create -f /app/conda.yaml
+# Mengaktifkan environment yang telah dibuat
+RUN echo "source activate mlflow-env" > ~/.bashrc
+ENV CONDA_DEFAULT_ENV mlflow-env
 
-# Set environment untuk menggunakan environment conda
-SHELL ["conda", "run", "-n", "mlflow-env", "/bin/bash", "-c"]
+# Menginstall MLflow dan dependencies lainnya
+RUN pip install mlflow==2.22.0
 
-# Salin seluruh isi MLProject ke dalam container
-COPY MLProject /app
+# Menentukan entry point untuk container (menjalankan eksperimen MLflow)
+ENTRYPOINT ["mlflow", "run", "."]
 
-# Install MLflow dan dependencies lainnya
-RUN pip install -r /app/MLProject/requirements.txt
-
-# Expose port untuk akses jika diperlukan (misal untuk API atau service)
+# Menentukan port yang digunakan oleh MLflow
 EXPOSE 5000
-
-# Set entrypoint untuk menjalankan model
-ENTRYPOINT ["conda", "run", "-n", "mlflow-env", "python", "/app/MLProject/modelling.py"]
