@@ -23,7 +23,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: '3.8'
-        activate-environment: 'stunting-prediction'
+        activate-environment: 'mlflow-env'
         environment-file: MLProject/conda.yaml
         auto-activate-base: false
     
