@@ -9,7 +9,7 @@ on:
 
 jobs:
   train-and-deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repo
@@ -22,16 +22,14 @@ jobs:
         environment-file: MLProject/conda.yaml
         activate-environment: mlflow-env
 
-    - name: Install dependencies
+    - name: Install MLflow
       shell: bash -l {0}
       run: |
-        conda activate mlflow-env
         pip install mlflow==2.22.0
 
     - name: Run MLflow Project
       shell: bash -l {0}
       run: |
-        conda activate mlflow-env
         mlflow run MLProject -P n_neighbors=3
 
     - name: Upload MLflow artifacts
