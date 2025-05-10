@@ -4,7 +4,7 @@ import mlflow.sklearn
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
-# Aktifkan autolog dari MLflow sebelum training
+# Autolog harus diaktifkan sebelum training
 mlflow.sklearn.autolog()
 
 # Load data
@@ -20,11 +20,14 @@ mlflow.set_experiment("basic-model_v2")
 with mlflow.start_run():
     model = KNeighborsClassifier(n_neighbors=3)
     model.fit(X_train, y_train)
-
-    # Prediksi dan hitung akurasi
+    
+    # Prediksi dan akurasi
     preds = model.predict(X_test)
     acc = accuracy_score(y_test, preds)
     print(f"Accuracy: {acc}")
-
-    # (Opsional) Logging model secara eksplisit ke MLflow
-    mlflow.sklearn.log_model(model, artifact_path="model", input_example=X_test[:5])
+    
+    # Log model ke MLflow
+    mlflow.sklearn.log_model(model, "model")
+    
+    # Log metric akurasi
+    mlflow.log_metric("accuracy", acc)
