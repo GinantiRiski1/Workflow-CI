@@ -4,9 +4,16 @@ import mlflow
 import mlflow.sklearn
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
+import dagshub  # Pastikan dagshub sudah terinstal
+
+# Inisialisasi DagsHub untuk MLflow
+dagshub.init(repo_owner='GinantiRiski1', repo_name='my-first-repo', mlflow=True)  # Ganti dengan username dan repo kamu
+
+# Konfigurasi MLflow ke DagsHub
+mlflow.set_tracking_uri("https://dagshub.com/GinantiRiski1/my-first-repo.mlflow")  # Ganti dengan URL repo kamu
 
 # Fungsi untuk training model
-def main(alpha):
+def main(n_neighbors):
     # Autolog harus diaktifkan sebelum training
     mlflow.sklearn.autolog()
 
@@ -21,8 +28,8 @@ def main(alpha):
 
     # Mulai MLflow run
     with mlflow.start_run():
-        # Model dengan parameter alpha yang diterima
-        model = KNeighborsClassifier(n_neighbors=int(alpha))
+        # Model dengan parameter n_neighbors yang diterima
+        model = KNeighborsClassifier(n_neighbors=int(n_neighbors))
         model.fit(X_train, y_train)
 
         # Prediksi dan akurasi
@@ -33,9 +40,8 @@ def main(alpha):
 if __name__ == "__main__":
     # Parse argumen dari command line
     parser = argparse.ArgumentParser()
-    parser.add_argument("--alpha", type=float, default=3, help="Alpha (n_neighbors) for KNN")
+    parser.add_argument("--n_neighbors", type=int, default=3, help="Number of neighbors for KNN")
     args = parser.parse_args()
 
-    # Panggil main function dengan argumen alpha
-    main(args.alpha)
-
+    # Panggil main function dengan argumen n_neighbors
+    main(args.n_neighbors)
