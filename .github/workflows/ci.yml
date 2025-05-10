@@ -19,18 +19,17 @@ jobs:
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v2
       with:
-        miniconda-version: 'latest'  # Pastikan versi Miniconda yang valid digunakan
-        environment-file: MLProject/conda.yaml  # Menentukan path ke conda.yaml di dalam folder MLProject
-        auto-activate-base: false  # Menonaktifkan auto-activate pada base environment
+        miniconda-version: 'latest'
+        environment-file: MLProject/conda.yaml  # Menggunakan file conda.yaml di folder MLProject
+        auto-activate-base: false  # Tidak perlu aktifkan base environment secara otomatis
 
-    - name: Initialize Conda
+    - name: Create and activate the conda environment
       run: |
-        conda init bash  # Inisialisasi conda untuk shell bash
-        source ~/.bashrc  # Mengaktifkan .bashrc untuk memastikan conda diinisialisasi dengan benar
-        conda --version  # Menampilkan versi conda untuk memastikan instalasi condanya berhasil
-        conda info  # Memeriksa informasi tentang condanya
-        conda env list  # Memeriksa apakah environment msml-env sudah ada
+        conda env create -f MLProject/conda.yaml  # Membuat environment dari file conda.yaml
+        conda activate msml-env  # Mengaktifkan environment yang telah dibuat
+        conda info --envs  # Memastikan bahwa environment msml-env sudah ada
+        conda list  # Menampilkan daftar paket di environment msml-env
 
     - name: Run MLflow with conda run
       run: |
-        conda run -n msml-env mlflow run . -P n_neighbors=3  # Menjalankan mlflow dalam environment msml-env
+        conda run -n msml-env mlflow run . -P n_neighbors=3  # Menjalankan MLflow dalam environment msml-env
