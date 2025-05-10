@@ -6,12 +6,12 @@ dependencies:
   - python=3.10
   - pip
   - pip:
-      - imbalanced-learn==0.13.0
+      - imbalanced-learn==0.11.0
       - matplotlib==3.10.3
-      - numpy==2.2.5
+      - numpy==1.24.2  # Versi yang lebih valid
       - pandas==2.2.3
-      - protobuf==6.30.2
-      - scikit-learn==1.6.1
+      - protobuf==3.20.0  # Versi lebih kompatibel
+      - scikit-learn==1.1.0  # Versi stabil
       - seaborn==0.13.2
       - joblib==1.4.2
       - dagshub
