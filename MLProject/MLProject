@@ -1,7 +1,10 @@
-name: knn-autolog-model
+name: knn-mlflow-project
 
-conda_env: conda.yaml  # Menentukan environment yang digunakan dalam eksperimen
+conda_env: conda.yaml
 
 entry_points:
   main:
-    command: "python modelling.py"  # Perintah untuk menjalankan model atau eksperimen
+    parameters:
+      n_neighbors: {type: int, default: 3}
+    command: >
+      python train.py --n_neighbors {n_neighbors}
