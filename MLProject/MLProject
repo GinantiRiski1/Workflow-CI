@@ -1,4 +1,4 @@
-name: msml-car-buying-model
+name: knn-car-model
 
 conda_env: conda.yaml
 
