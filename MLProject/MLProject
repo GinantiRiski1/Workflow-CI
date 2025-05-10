@@ -1,7 +1,7 @@
 name: knn-autolog-model
 
-conda_env: conda.yaml
+conda_env: conda.yaml  # Menentukan environment yang digunakan dalam eksperimen
 
 entry_points:
   main:
-    command: "python modelling.py"
+    command: "python modelling.py"  # Perintah untuk menjalankan model atau eksperimen
