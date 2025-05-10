@@ -3,79 +3,60 @@ name: MLflow CI & Docker Build
 on:
   push:
     paths:
-      
-'MLProject/**'
-workflow_dispatch:
+      - 'MLProject/**'
+  workflow_dispatch:
 
 jobs:
   train-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
-      
-name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # Setup Miniconda
-      
-name: Set up Miniconda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        environment-file: MLProject/conda.yaml
-        activate-environment: mlflow-env
-        auto-activate-base: false
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: MLProject/conda.yaml
+          activate-environment: mlflow-env
+          auto-activate-base: false
 
-      # Install dependencies and MLflow CLI
-      
-name: Install Dependencies and MLflow
-      shell: bash -l {0}
-      run: |
-        conda activate mlflow-env
-        pip install -r MLProject/requirements.txt
-        pip install mlflow==2.22.0
+      - name: Install Dependencies and MLflow
+        shell: bash -l {0}
+        run: |
+          conda activate mlflow-env
+          pip install -r MLProject/requirements.txt
+          pip install mlflow==2.22.0
 
-      # Jalankan MLflow training
-      
-name: Run MLflow Project
-      shell: bash -l {0}
-      run: |
-        conda activate mlflow-env
-        mlflow run MLProject -P n_neighbors=3
+      - name: Run MLflow Project
+        shell: bash -l {0}
+        run: |
+          conda activate mlflow-env
+          mlflow run MLProject -P n_neighbors=3
 
-      # List isi artifacts
-      
-name: List contents of MLruns
-      run: |
-        ls -R MLProject/mlruns || echo "No mlruns folder found"
+      - name: List contents of MLruns
+        run: |
+          ls -R MLProject/mlruns || echo "No mlruns folder found"
 
-      # Simpan artifacts hasil MLflow
-      
-name: Save MLflow Artifacts
-      if: always()
-      run: |
-        mkdir -p artifacts
-        cp -r MLProject/mlruns artifacts/mlruns
+      - name: Save MLflow Artifacts
+        if: always()
+        run: |
+          mkdir -p artifacts
+          cp -r MLProject/mlruns artifacts/mlruns
 
-      # Upload artifact ke GitHub Actions
-      
-name: Upload MLflow artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: mlflow-artifacts
-        path: artifacts/mlruns
+      - name: Upload MLflow artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: mlflow-artifacts
+          path: artifacts/mlruns
 
-      # Login ke Docker Hub
-      
-name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build dan push Docker image
-      
-name: Build and Push Docker Image
-      run: |
-        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest MLProject
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest MLProject
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest
