@@ -35,7 +35,7 @@ jobs:
       env:
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
-        MLFLOW_TRACKING_URI: "https://dagshub.com/agummds/mlflow-env-Toddler.mlflow"
+        MLFLOW_TRACKING_URI: "https://dagshub.com/GinantiRiski1/my-first-repo.mlflow"
       run: |
         conda init bash
         source ~/.bashrc
