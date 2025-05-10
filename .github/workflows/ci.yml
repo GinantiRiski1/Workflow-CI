@@ -26,61 +26,66 @@ jobs:
       # Verifikasi environment Conda aktif
       - name: Verify Conda Environment
         run: |
-          conda info --envs
+          source ~/.bashrc
           conda activate mlflow-env
+          conda info --envs
           conda list
 
-      # Install dependencies from requirements.txt if needed
+      # Install dependencies dari requirements.txt (jika ada)
       - name: Install Dependencies
         run: |
+          source ~/.bashrc
           conda activate mlflow-env
-          pip install -r MLProject/requirements.txt
+          pip install -r MLProject/requirements.txt || echo "No requirements.txt found"
 
-      # Install MLflow CLI if necessary
+      # Install MLflow CLI
       - name: Install MLflow CLI
         run: |
+          source ~/.bashrc
           conda activate mlflow-env
           pip install mlflow==2.22.0
 
-      # Verify if MLflow is installed correctly
+      # Cek versi MLflow
       - name: Check MLflow version
         run: |
+          source ~/.bashrc
           conda activate mlflow-env
           mlflow --version
 
-      # Run MLflow experiment and ensure artifacts are created
+      # Jalankan MLflow Project
       - name: Run MLflow Project
         run: |
-          cd MLProject
-          mlflow run .
+          source ~/.bashrc
+          conda activate mlflow-env
+          mlflow run MLProject
 
-      # Debug: list contents of the MLruns directory (ensure it's created)
+      # Debug isi folder mlruns
       - name: List contents of mlruns
         run: |
-          ls -l MLProject/mlruns
+          ls -l MLProject/mlruns || echo "mlruns not found"
 
-      # Save and upload MLflow artifacts
+      # Simpan artifacts
       - name: Save MLflow Artifacts
         if: always()
         run: |
           mkdir -p artifacts
-          cp -r MLProject/mlruns artifacts/mlruns
+          cp -r MLProject/mlruns artifacts/mlruns || echo "mlruns not found, skipping copy"
 
-      # Upload MLflow artifacts to GitHub Actions storage
+      # Upload artifact ke GitHub Actions
       - name: Upload MLflow artifacts
         uses: actions/upload-artifact@v3
         with:
           name: mlflow-artifacts
           path: artifacts/mlruns
 
-      # Log in to Docker Hub
+      # Login ke Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build and push Docker image
+      # Build dan push Docker image
       - name: Build and Push Docker Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/knn-model:latest MLProject
