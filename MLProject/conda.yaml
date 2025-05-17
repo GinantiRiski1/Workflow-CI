@@ -1,4 +1,4 @@
-name: mlflow-car
+name: mlflow-carr
 channels:
   - conda-forge
   - defaults
