@@ -18,5 +18,5 @@ SHELL ["conda", "run", "-n", "mlflow-carr", "/bin/bash", "-c"]
 # RUN pip install -r requirements.txt  # Kalau kamu masih pakai file ini
 
 # Jalankan script training menggunakan conda environment
-CMD ["conda", "run", "--no-capture-output", "-n", "mlflow-car", "python", "modelling.py"]
+CMD ["conda", "run", "--no-capture-output", "-n", "mlflow-carr", "python", "modelling.py"]
 
