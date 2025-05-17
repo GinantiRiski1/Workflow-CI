@@ -1,4 +1,4 @@
-name: mlflow-carr
+name: detect-carr
 channels:
   - conda-forge
   - defaults
