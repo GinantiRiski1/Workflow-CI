@@ -12,7 +12,7 @@ COPY conda.yaml .
 RUN conda env create -f conda.yaml
 
 # Aktifkan environment conda secara default di shell
-SHELL ["conda", "run", "-n", "mlflow-env", "/bin/bash", "-c"]
+SHELL ["conda", "run", "-n", "mlflow-car", "/bin/bash", "-c"]
 
 # Install pip requirements jika ada tambahan (optional)
 # RUN pip install -r requirements.txt  # Kalau kamu masih pakai file ini
