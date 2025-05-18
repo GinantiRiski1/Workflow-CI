@@ -5,6 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 import argparse
 
+mlflow.set_tracking_uri("file:///app/mlruns")
 mlflow.set_experiment("car_purchased_experiment")
 mlflow.sklearn.autolog()
 
