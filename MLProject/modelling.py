@@ -5,6 +5,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 import argparse
 
+# Set nama experiment supaya MLflow tidak error cari experiment default (ID 0)
+mlflow.set_experiment("car_purchased_experiment")
+
 # Autolog harus diaktifkan sebelum training
 mlflow.sklearn.autolog()
 
