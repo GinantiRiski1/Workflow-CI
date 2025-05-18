@@ -18,4 +18,5 @@ COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Jalankan start.sh sebagai CMD
-CMD ["/app/start.sh"]
+CMD ["conda", "run", "--no-capture-output", "-n", "car_purchased", "/app/start.sh"]
+
