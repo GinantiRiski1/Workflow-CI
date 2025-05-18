@@ -1,14 +1,19 @@
+# Gunakan base image Miniconda
 FROM continuumio/miniconda3:latest
 
+# Set working directory
 WORKDIR /app
 
+# Copy semua isi dari MLProject (karena context: ./MLProject)
 COPY . .
 
+# Install dependencies dari conda.yaml
 RUN conda env create -f conda.yaml
 
+# Aktifkan environment conda
 SHELL ["conda", "run", "-n", "car_purchased", "/bin/bash", "-c"]
 
-# Run training sekaligus serve model dalam satu command shell script
+# Jalankan training (jika modelling.py perlu dilatih ulang di container) dan serve model
 CMD python modelling.py && \
     LATEST_RUN=$(ls -td /app/mlruns/0/* | head -1) && \
     mlflow models serve -m "$LATEST_RUN/artifacts/model" -p 5000 --host 0.0.0.0
