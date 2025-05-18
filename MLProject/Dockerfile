@@ -12,11 +12,11 @@ COPY conda.yaml .
 RUN conda env create -f conda.yaml
 
 # Aktifkan environment conda secara default di shell
-SHELL ["conda", "run", "-n", "detect-carr", "/bin/bash", "-c"]
+SHELL ["conda", "run", "-n", "car_purchased", "/bin/bash", "-c"]
 
 # Install pip requirements jika ada tambahan (optional)
 # RUN pip install -r requirements.txt  # Kalau kamu masih pakai file ini
 
 # Jalankan script training menggunakan conda environment
-CMD ["conda", "run", "--no-capture-output", "-n", "detect-carr", "python", "modelling.py"]
+CMD ["conda", "run", "--no-capture-output", "-n", "car_purchased", "python", "modelling.py"]
 
