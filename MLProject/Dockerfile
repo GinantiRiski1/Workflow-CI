@@ -10,11 +10,12 @@ COPY . .
 # Install dependencies dari conda.yaml
 RUN conda env create -f conda.yaml
 
-# Aktifkan environment conda
+# Pakai shell conda run untuk aktifkan environment
 SHELL ["conda", "run", "-n", "car_purchased", "/bin/bash", "-c"]
 
-# Jalankan training (jika modelling.py perlu dilatih ulang di container) dan serve model
-CMD python modelling.py && \
-    LATEST_RUN=$(find /app/mlruns/0/ -mindepth 1 -maxdepth 1 -type d | sort -r | head -1) && \
-    mlflow models serve -m "$LATEST_RUN/artifacts/model" -p 5000 --host 0.0.0.0
+# Copy script start.sh yang berisi perintah untuk training + serve
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
+# Jalankan start.sh sebagai CMD
+CMD ["/app/start.sh"]
