@@ -22,11 +22,17 @@ X_test = pd.read_csv("car_preprocessing/X_test.csv")
 y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
 y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
 
-# Bungkus training dan evaluasi dalam mlflow.start_run()
-with mlflow.start_run():
+def train_and_eval():
     model = KNeighborsClassifier(n_neighbors=args.n_neighbors)
     model.fit(X_train, y_train)
 
     preds = model.predict(X_test)
     acc = accuracy_score(y_test, preds)
     print(f"Accuracy: {acc}")
+
+# Cek apakah sudah ada run aktif
+if mlflow.active_run() is None:
+    with mlflow.start_run():
+        train_and_eval()
+else:
+    train_and_eval()
