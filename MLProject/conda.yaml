@@ -1,4 +1,4 @@
-name: detect-carr
+name: car_purchased
 channels:
   - conda-forge
   - defaults
