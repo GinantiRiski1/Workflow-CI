@@ -5,7 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 import argparse
 
-# Set nama experiment supaya MLflow tidak error cari experiment default (ID 0)
+# Set nama experiment agar tidak default ke ID 0
 mlflow.set_experiment("car_purchased_experiment")
 
 # Autolog harus diaktifkan sebelum training
@@ -22,11 +22,11 @@ X_test = pd.read_csv("car_preprocessing/X_test.csv")
 y_train = pd.read_csv("car_preprocessing/y_train.csv").values.ravel()
 y_test = pd.read_csv("car_preprocessing/y_test.csv").values.ravel()
 
-# Inisialisasi dan latih model
-model = KNeighborsClassifier(n_neighbors=args.n_neighbors)
-model.fit(X_train, y_train)
+# Bungkus training dan evaluasi dalam mlflow.start_run()
+with mlflow.start_run():
+    model = KNeighborsClassifier(n_neighbors=args.n_neighbors)
+    model.fit(X_train, y_train)
 
-# Prediksi dan evaluasi
-preds = model.predict(X_test)
-acc = accuracy_score(y_test, preds)
-print(f"Accuracy: {acc}")
+    preds = model.predict(X_test)
+    acc = accuracy_score(y_test, preds)
+    print(f"Accuracy: {acc}")
