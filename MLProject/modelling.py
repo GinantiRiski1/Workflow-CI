@@ -5,7 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 import argparse
 
-# Set nama experiment agar tidak default ke ID 0
+# Set experiment supaya tidak default ke ID 0
 mlflow.set_experiment("car_purchased_experiment")
 
 # Autolog harus diaktifkan sebelum training
@@ -30,7 +30,6 @@ def train_and_eval():
     acc = accuracy_score(y_test, preds)
     print(f"Accuracy: {acc}")
 
-# Cek apakah sudah ada run aktif
 if mlflow.active_run() is None:
     with mlflow.start_run():
         train_and_eval()
