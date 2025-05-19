@@ -1,4 +1,4 @@
-name: car_purchased
+name: car
 channels:
   - conda-forge
   - defaults
