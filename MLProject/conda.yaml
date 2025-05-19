@@ -17,3 +17,4 @@ dependencies:
       - joblib>=1.2.0
       - flask
       - dagshub
+      - prometheus_client
