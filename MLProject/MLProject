@@ -1,4 +1,4 @@
-name: car
+name: mlflow-env
 
 conda_env: conda.yaml
 
