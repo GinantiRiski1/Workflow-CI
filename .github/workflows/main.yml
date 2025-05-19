@@ -23,7 +23,7 @@ jobs:
       uses: conda-incubator/setup-miniconda@v2
       with:
         python-version: '3.10'
-        activate-environment: 'car_purchased'
+        activate-environment: 'car'
         environment-file: MLProject/conda.yaml
         auto-activate-base: false
     
@@ -32,7 +32,7 @@ jobs:
       run: |
         conda init bash
         source ~/.bashrc
-        conda activate car_purchased
+        conda activate car
         pip install mlflow requests tenacity
     
     - name: Test DagsHub Connection
@@ -43,7 +43,7 @@ jobs:
       run: |
         conda init bash
         source ~/.bashrc
-        conda activate car_purchased
+        conda activate car
         python -c "
         import mlflow
         import os
@@ -67,9 +67,9 @@ jobs:
       run: |
         conda init bash
         source ~/.bashrc
-        conda activate car_purchased
+        conda activate car
         mlflow run MLProject \
-          --experiment-name "car_purchased" \
+          --experiment-name "car" \
           --env-manager=conda
 
     - name: Download MLflow Artifacts
@@ -80,7 +80,7 @@ jobs:
       run: |
         conda init bash
         source ~/.bashrc
-        conda activate car_purchased
+        conda activate car
         python -c "
         import mlflow
         import os
@@ -91,7 +91,7 @@ jobs:
         def download_artifacts_with_retry():
             try:
                 mlflow.set_tracking_uri('https://dagshub.com/GinantiRiski1/my-first-repo.mlflow')
-                experiment = mlflow.get_experiment_by_name('car_purchased')
+                experiment = mlflow.get_experiment_by_name('car')
                 if experiment is None:
                     print('Experiment not found')
                     return
@@ -158,4 +158,4 @@ jobs:
       with:
         context: ./MLProject
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/car_purchased:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/car:latest
