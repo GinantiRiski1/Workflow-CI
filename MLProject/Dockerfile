@@ -20,3 +20,4 @@ EXPOSE 5000
 
 # Run the Flask app
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "mlflow-env", "python", "inference.py"]
+
