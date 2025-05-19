@@ -18,3 +18,4 @@ dependencies:
       - flask
       - dagshub
       - prometheus_client
+      - psutil
