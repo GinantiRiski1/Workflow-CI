@@ -6,9 +6,9 @@ REQUEST_COUNT = Counter(
     "request_count", "Total number of requests", ['endpoint', 'method']
 )
 
-# 2. Total error count per endpoint
-REQUEST_ERRORS = Counter(
-    "request_errors", "Total number of errors", ['endpoint']
+# 2. GANTI: Total failed inferences
+FAILED_INFERENCES = Counter(
+    "failed_inference_total", "Total number of failed inferences"
 )
 
 # 3. Histogram: time spent on inference
@@ -49,6 +49,16 @@ REQUEST_PAYLOAD_SIZE = Histogram(
 # 10. Histogram: response payload size in bytes
 RESPONSE_PAYLOAD_SIZE = Histogram(
     "response_payload_size_bytes", "Size of response payload in bytes"
+)
+
+# 11. TAMBAHAN: Total successful predictions
+TOTAL_PREDICTIONS = Counter(
+    "successful_predictions_total", "Total number of successful predictions"
+)
+
+# 12. TAMBAHAN: Request duration histogram
+REQUEST_DURATION_HISTOGRAM = Histogram(
+    "request_duration_seconds", "Duration of requests per endpoint", ['endpoint']
 )
 
 def prometheus_metrics():
