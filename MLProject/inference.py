@@ -6,9 +6,10 @@ from flask import Flask, request, jsonify, Response
 
 # Import Prometheus metrics
 from prometheus_exporter import (
-    REQUEST_COUNT, REQUEST_ERRORS, INFERENCE_TIME, prometheus_metrics,
+    REQUEST_COUNT, FAILED_INFERENCES, INFERENCE_TIME, prometheus_metrics,
     IN_FLIGHT_REQUESTS, LATENCY_SUMMARY, CPU_USAGE_PERCENT, MEMORY_USAGE_PERCENT,
-    REQUESTS_BY_USER_AGENT, REQUEST_PAYLOAD_SIZE, RESPONSE_PAYLOAD_SIZE
+    REQUESTS_BY_USER_AGENT, REQUEST_PAYLOAD_SIZE, RESPONSE_PAYLOAD_SIZE,
+    TOTAL_PREDICTIONS, REQUEST_DURATION_HISTOGRAM
 )
 
 # Load model, scaler, and label encoder
@@ -26,7 +27,7 @@ def home():
 def predict():
     start_time = time.time()
     IN_FLIGHT_REQUESTS.inc()
-    
+
     # Hitung payload size request body
     request_size = request.content_length or 0
     REQUEST_PAYLOAD_SIZE.observe(request_size)
@@ -58,19 +59,23 @@ def predict():
         response_data = response.get_data()
         RESPONSE_PAYLOAD_SIZE.observe(len(response_data))
 
+        # Hitung dan simpan latency
         latency = time.time() - start_time
         LATENCY_SUMMARY.labels(endpoint='/predict').observe(latency)
+        REQUEST_DURATION_HISTOGRAM.labels(endpoint='/predict').observe(latency)
 
-        # Update CPU and memory usage
+        # Tambahkan ke total prediksi
+        TOTAL_PREDICTIONS.inc()
+
+        # Update CPU dan memory usage
         CPU_USAGE_PERCENT.set(psutil.cpu_percent())
         MEMORY_USAGE_PERCENT.set(psutil.virtual_memory().percent)
 
         IN_FLIGHT_REQUESTS.dec()
-
         return response
 
     except Exception as e:
-        REQUEST_ERRORS.labels(endpoint='/predict').inc()
+        FAILED_INFERENCES.inc()
         IN_FLIGHT_REQUESTS.dec()
         return jsonify({'error': str(e)}), 500
 
