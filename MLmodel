@@ -1,0 +1,29 @@
+artifact_path: model
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.10.17
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+is_signature_from_type_hint: false
+mlflow_version: 2.22.0
+model_size_bytes: 41988
+model_uuid: 4166e5d9593e4fcd9b5ebb620e2b5694
+prompts: null
+run_id: ff9cb31f23ef41bfae73e79632e92644
+signature:
+  inputs: '[{"type": "double", "name": "Gender", "required": true}, {"type": "double",
+    "name": "Age", "required": true}, {"type": "double", "name": "AnnualSalary", "required":
+    true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "int64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-05-20 03:12:04.551265'
